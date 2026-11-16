@@ -12,7 +12,7 @@ module SigmaLint
   LEVELS = %w[informational low medium high critical].freeze
   STATUSES = %w[stable test experimental deprecated unsupported].freeze
   UUID = /\A[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\z/i.freeze
-  ATTACK_TAG = /\Aattack\.(t\d{4}(\.\d{3})?|[a-z][a-z_-]*)\z/.freeze
+  ATTACK_TAG = /\Aattack\.(t\d{4}(\.\d{3})?|[gs]\d{4}|[a-z][a-z_-]*)\z/.freeze
   MAX_DOCS = 5000
   MAX_BYTES = 20_000_000
 
@@ -34,7 +34,7 @@ module SigmaLint
       body = c.join
       next nil if body.strip.empty?
 
-      YAML.safe_load(body, permitted_classes: [Date, Time], aliases: false)
+      YAML.safe_load(body, permitted_classes: [Date, Time, Symbol], aliases: false)
     end.compact
   end
 
@@ -86,14 +86,10 @@ module SigmaLint
     end
   end
 
+  # Only keyword selections (bare values with no field) that are just `*` match every event.
+  # `field: '*'` and `field|contains: '*'` are the common Sigma idiom for "field is present", so they are not flagged.
   def self.broad_selection?(sel)
-    case sel
-    when Hash
-      sel.any? { |k, v| !k.to_s.include?('|') && match_all?(v) } || sel.any? { |k, v| k.to_s.include?('|') && match_all?(v) && k.to_s !~ /\|(re|cidr)/ }
-    when Array
-      sel.any? { |x| match_all?(x) || (x.is_a?(Hash) && broad_selection?(x)) }
-    else false
-    end
+    sel.is_a?(Array) && sel.any? { |x| x.is_a?(String) && !x.empty? && x.delete('*').empty? }
   end
 
   def self.lint_rule(rule, file, idx, seen_ids)

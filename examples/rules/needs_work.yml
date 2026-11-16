@@ -12,7 +12,7 @@ detection:
       - 'DownloadString'
       - 'DownloadFile'
   selection_any:
-    Image: '*'
+    - '*'
   unused_filter:
     ParentImage|endswith: '\explorer.exe'
   condition: selection_cmd and selection_img

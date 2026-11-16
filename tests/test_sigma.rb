@@ -179,14 +179,26 @@ class SigmaLintTest < Minitest::Test
     assert_equal [], rules(good_without('status:'))
   end
 
-  def test_match_all_value
+  def test_field_wildcard_is_the_exists_idiom
     t = GOOD.sub("Image|endswith: 'x.exe'", "Image: '*'")
+    assert_equal [], rules(t)
+    t = GOOD.sub("Image|endswith: 'x.exe'", "Image|contains: '*'")
+    assert_equal [], rules(t)
+  end
+
+  def test_keyword_match_all
+    t = GOOD.sub("selection:\n    Image|endswith: 'x.exe'", "selection:\n    - '*'")
     assert_equal ['SIG009'], rules(t)
   end
 
-  def test_match_all_list
-    t = GOOD.sub("Image|endswith: 'x.exe'", "Image:\n          - '*'\n          - '**'")
-    assert_equal ['SIG009'], rules(t)
+  def test_real_world_symbol_like_scalar_loads
+    t = GOOD.sub("Image|endswith: 'x.exe'", "Image|contains:\n      - :\\ProgramData'")
+    assert_equal [], rules(t)
+  end
+
+  def test_group_and_software_tags_are_valid
+    t = GOOD.sub('attack.t1059.001', 'attack.g0020').sub('attack.execution', 'attack.s0508')
+    assert_equal [], rules(t)
   end
 
   def test_wildcard_with_text_is_not_match_all
