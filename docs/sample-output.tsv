@@ -1,0 +1,15 @@
+# 3 files, 14 findings
+high	SIG002	rules/needs_work.yml#Rule Without Condition	detection has no condition
+high	SIG003	rules/needs_work.yml#Suspicious PowerShell Download	condition uses "selection_img" which is not defined in detection
+medium	SIG005	rules/needs_work.yml#Suspicious PowerShell Download	id "not-a-uuid" is not a UUID
+medium	SIG008	rules/needs_work.yml#Suspicious PowerShell Download	level "severe" is not one of informational, low, medium, high, critical
+medium	SIG008	rules/needs_work.yml#Suspicious PowerShell Download	status "prod" is not one of stable, test, experimental, deprecated, unsupported
+medium	SIG009	rules/needs_work.yml#Suspicious PowerShell Download	selection "selection_any" contains a value that matches everything
+medium	SIG011	rules/proc_creation_whoami.yml#Whoami Execution	id 4a5b6c7d-1e2f-4a3b-9c8d-0e1f2a3b4c5d is also used by rules/needs_work.yml#Rule Without Condition
+low	SIG004	rules/needs_work.yml#Suspicious PowerShell Download	selection "selection_any" is defined but never used in the condition
+low	SIG004	rules/needs_work.yml#Suspicious PowerShell Download	selection "unused_filter" is defined but never used in the condition
+low	SIG007	rules/needs_work.yml#Rule Without Condition	missing author
+low	SIG007	rules/needs_work.yml#Suspicious PowerShell Download	missing description
+low	SIG010	rules/needs_work.yml#Suspicious PowerShell Download	tag "attack.t10599" is not a valid ATT&CK tag
+low	SIG012	rules/needs_work.yml#Suspicious PowerShell Download	missing falsepositives
+info	SIG000	rules/notes.yml	document is not a Sigma rule, ignored

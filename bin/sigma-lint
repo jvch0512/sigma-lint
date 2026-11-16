@@ -1,0 +1,61 @@
+#!/usr/bin/env ruby
+# frozen_string_literal: true
+
+require_relative '../lib/sigma_lint'
+
+def usage
+  warn "usage: sigma-lint PATH [--tsv] [--fail-on medium|high|critical]\nExit: 0 ok, 1 findings at or above --fail-on, 2 bad input."
+  2
+end
+
+def main(argv)
+  path = nil
+  tsv = false
+  fail_on = nil
+  i = 0
+  while i < argv.size
+    a = argv[i]
+    if a == '--tsv'
+      tsv = true
+    elsif a == '--fail-on'
+      i += 1
+      return usage unless %w[medium high critical].include?(argv[i])
+
+      fail_on = argv[i]
+    elsif a.start_with?('-') && a.size > 1
+      return usage
+    elsif path
+      return usage
+    else
+      path = a
+    end
+    i += 1
+  end
+  return usage unless path
+
+  unless File.exist?(path)
+    warn "error: no such file or directory: #{path}"
+    return 2
+  end
+  p = path.size > 1 ? path.sub(%r{/+\z}, '') : path
+  p = '/' if p.empty?
+  findings, n = SigmaLint.audit_path(p)
+  head = "#{n} files, #{findings.size} findings"
+  out = [tsv ? "# #{head}" : head]
+  findings.each do |f|
+    if tsv
+      out << [f.sev, f.rule, f.where, f.msg].join("\t")
+    else
+      out << format('%-8s %s %s', f.sev.upcase, f.rule, f.where)
+      out << "         #{f.msg}"
+    end
+  end
+  $stdout.write("#{out.join("\n")}\n")
+  if fail_on && findings.any? { |f| SigmaLint.rank(f.sev) <= SigmaLint.rank(fail_on) }
+    return 1
+  end
+
+  0
+end
+
+exit main(ARGV)

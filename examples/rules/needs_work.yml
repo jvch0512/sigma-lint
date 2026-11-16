@@ -1,0 +1,34 @@
+title: Suspicious PowerShell Download
+id: not-a-uuid
+status: prod
+author: Example Team
+tags:
+  - attack.t10599
+logsource:
+  product: windows
+detection:
+  selection_cmd:
+    CommandLine|contains:
+      - 'DownloadString'
+      - 'DownloadFile'
+  selection_any:
+    Image: '*'
+  unused_filter:
+    ParentImage|endswith: '\explorer.exe'
+  condition: selection_cmd and selection_img
+level: severe
+---
+title: Rule Without Condition
+id: 4a5b6c7d-1e2f-4a3b-9c8d-0e1f2a3b4c5d
+description: Duplicate id of another rule and no condition.
+logsource:
+  category: process_creation
+  product: linux
+detection:
+  selection:
+    Image|endswith: '/curl'
+falsepositives:
+  - Unknown
+level: medium
+tags:
+  - attack.t1105
